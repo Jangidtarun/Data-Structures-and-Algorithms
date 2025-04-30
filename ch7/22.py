@@ -14,6 +14,8 @@ file. Test your program with at least 10 names
 # TODO
 # 1. import the contacts from a list to a variable
 # 2. convert that list into a binary tree
+# 3. Add a user menu
+# 4. Implement the functions from user menu
 #
 
 import csv
@@ -84,20 +86,48 @@ def load_contacts(filepath):
     return contacts
 
 
-def user_menu():
+def user_menu(tree):
     # well well well
-    pass
+    while True:
+        print("Press S to search for a name.")
+        print("Press I to insert a name.")
+        print("Press D to delete a name.")
+        print("Press P to see the tree.")
+        print("Press X to exit.")
+        option = input("Select: ")
+
+        if option == "X":
+            print("Exiting...")
+            break
+        elif option == "S":
+            # search for a name
+            pass
+        elif option == "I":
+            # insert a name
+            pass
+        elif option == "D":
+            # delete a name
+            pass
+        elif option == "P":
+            # print the tree
+            tree.print_tree()
+        else:
+            print("Wrong selection.")
+            
     
 
 def main():
     filepath = "./contacts.txt"
     contacts = load_contacts(filepath)
-    print(contacts)
+    # print(contacts)
 
     root = Node(key="root", data="000")
     root.list_to_bst(contacts)
-    root.print_tree()
+    # root.print_tree()
+
+    user_menu(root)
 
 
 if __name__ == "__main__":
     main()
+
