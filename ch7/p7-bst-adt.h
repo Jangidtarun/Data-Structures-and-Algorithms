@@ -66,3 +66,6 @@ bool bst_insert(bst_tree *tree, void *dataptr) {
     (tree->count)++;
     return true;
 }
+
+
+node_t
