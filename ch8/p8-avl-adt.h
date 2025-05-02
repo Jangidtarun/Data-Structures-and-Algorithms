@@ -37,6 +37,10 @@ static void _destroy	(Node* root);
 
 static Node* rotate_left	(Node* root);
 static Node* rotate_right	(Node* root);
+static Node* ins_left_bal	(Node* root, bool* taller);
+static Node* ins_right_bal	(Node* root, bool* taller);
+static Node* dlt_left_bal	(Node* root, bool* shorter);
+static Node* dlt_right_bal	(Node* root, bool* shorter);
 
 
 /*
