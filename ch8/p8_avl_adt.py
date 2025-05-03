@@ -1,3 +1,0 @@
-# AVL ADT data structure
-
-
