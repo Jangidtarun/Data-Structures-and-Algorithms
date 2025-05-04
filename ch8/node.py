@@ -24,10 +24,27 @@ class Node:
     
 
     def rotate_right(self):
-        pass
+        newroot = self.left
+        tmp = newroot.right
+        newroot.right = self
+        self.left = tmp
+        return newroot
 
 
     def rotate_left(self):
-        pass
+        newroot = self.right
+        tmp = newroot.left
+        newroot.left = self
+        self.right = tmp
+        return newroot
 
+    
+    def preorder(self):
+        print(self.data, end=" ")
+        if self.left:
+            self.left.preorder()
+        if self.right:
+            self.right.preorder()
 
+if __name__ == "__main__":
+    pass
