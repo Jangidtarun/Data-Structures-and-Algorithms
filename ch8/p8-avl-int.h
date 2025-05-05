@@ -1,5 +1,5 @@
-#ifndef _P8_AVL_ADT_H
-#define _P8_AVL_ADT_H
+#ifndef _P8_AVL_INT_H
+#define _P8_AVL_INT_H
 
 #include <stdlib.h>
 #include <stdio.h>

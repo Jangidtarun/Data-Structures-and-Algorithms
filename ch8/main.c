@@ -1,5 +1,5 @@
 #include <stdio.h>
-#include "p8-avl-adt.h"
+#include "p8-avl-int.h"
 
 
 int main() {

@@ -4,11 +4,26 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+
+/*
+ * AVL node structure
+ */
 struct node {
-	int key;
-	int height;
+	void *dataptr;
 	struct node *left;
 	struct node *right;
+	int height;
+};
+
+
+/*
+ * AVL Tree structure
+ * uses a compare function
+ */
+struct avl_tree {
+	struct node *root;
+	int count;
+	int (*cmp) (void *arg1, void *arg2);
 };
 
 
@@ -41,14 +56,14 @@ void update_height(struct node *curr) {
 
 
 // make node function
-struct node *make_node(int key) {
+struct node *make_node(void *dataptr) {
 	struct node *curr = (struct node *) malloc(sizeof(struct node));
 	if (!curr) {
 		fprintf(stderr, "Out of memory allocating new node\n");
 		return NULL;
 	}
 
-	curr->key = key;
+	curr->dataptr = dataptr;
 	curr->left = NULL;
 	curr->right = NULL;
 	curr->height = 1;
@@ -85,15 +100,31 @@ static struct node *rotate_left(struct node *curr) {
 }
 
 
-struct node *avl_insert(struct node *root, int key) {
-	if (!root) {
-		return make_node(key);
+struct avl_tree *avl_tree_init(int (*cmp) (void *arg1, void *arg2)) {
+	struct avl_tree *tree = (struct avl_tree *) malloc(sizeof(struct avl_tree));
+	if (!tree) {
+		printf("Not enough memory to initialize tree.\n");
+		return NULL;
 	}
 
-	if (key < root->key) {
-		root->left = avl_insert(root->left, key);
-	} else if (key > root->key) {
-		root->right = avl_insert(root->right, key);
+	tree->count = 0;
+	tree->root = NULL;
+	tree->cmp = cmp;
+
+	return tree;
+}
+
+
+struct node *avl_insert(struct avl_tree *tree, struct node *root, void *dataptr) {
+	if (!root) {
+		tree->count += 1;
+		return make_node(dataptr);
+	}
+
+	if (tree->cmp(dataptr, root->dataptr) < 0) {
+		root->left = avl_insert(tree, root->left, dataptr);
+	} else if (tree->cmp(dataptr, root->dataptr) > 0) {
+		root->right = avl_insert(tree, root->right, dataptr);
 	} else {
 		// no duplicates
 		return root;
@@ -103,21 +134,21 @@ struct node *avl_insert(struct node *root, int key) {
 	int bal = get_balance(root);
 
 	// LL
-	if (bal > 1 && key < root->left->key)
+	if (bal > 1 && tree->cmp(dataptr, root->left->dataptr) < 0)
 		return rotate_right(root);
 
 	// LR
-	if (bal > 1 && key > root->left->key) {
+	if (bal > 1 && tree->cmp(dataptr, root->left->dataptr) > 0) {
 		root->left = rotate_left(root->left);
 		return rotate_right(root);
 	}
 
 	// RR
-	if (bal < -1 && key > root->right->key)
+	if (bal < -1 && tree->cmp(dataptr, root->right->dataptr) > 0)
 		return rotate_left(root);
 
 	// RL
-	if (bal < -1 && key < root->right->key) {
+	if (bal < -1 && tree->cmp(dataptr, root->right->dataptr) < 0) {
 		root->right = rotate_right(root->right);
 		return rotate_left(root);
 	}
@@ -126,21 +157,51 @@ struct node *avl_insert(struct node *root, int key) {
 }
 
 
-void avl_inorder(struct node *root) {
+/*
+ * retrive a given data pointer
+ */
+struct node *avl_retrieve(struct avl_tree *tree, struct node *root, void *dataptr) {
 	if (root) {
-		avl_inorder(root->left);
-		printf("%2d ", root->key);
-		avl_inorder(root->right);
+		if (tree->cmp(dataptr, root->dataptr) < 0) {
+			return avl_retrieve(tree, root->left, dataptr);
+		} else if (tree->cmp(dataptr, root->dataptr) > 0) {
+			return avl_retrieve(tree, root->right, dataptr);
+		} else {
+			return root;
+		}
+	}
+
+	return NULL;
+}
+
+
+void avl_inorder(struct node *root, void (*process) (void *dataptr)) {
+	if (root) {
+		avl_inorder(root->left, process);
+		process(root->dataptr);
+		avl_inorder(root->right, process);
 	}
 }
 
 
-void avl_destroy(struct node *root) {
+static void avl_destroy(struct node *root) {
 	if (root) {
 		avl_destroy(root->left);
 		avl_destroy(root->right);
+		free(root->dataptr);
+		free(root);
 	}
-	free(root);
+}
+
+void avl_tree_destroy(struct avl_tree *tree) {
+	if (!tree) {
+		return;
+	} else {
+		if (tree->root) {
+			avl_destroy(tree->root);
+		}
+		free(tree);
+	}
 }
 
 
