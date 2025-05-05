@@ -19,8 +19,6 @@ int cmp_int(void *arg1, void *arg2) {
 	return 0;
 }
 
-int compare_words(void *arg1, void *arg2)
-
 
 void process(void *dataptr) {
 	int data = *(int *)dataptr;
