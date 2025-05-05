@@ -9,17 +9,20 @@ int main() {
 		root = bst_insert_tree(root, &arr[i]);
 	}
 
-	int key = 1;
+	int key = 7;
 	void *res = bst_retrieve(root, &key);
 	if (!res) {
-		printf("did not find 1\n");
+		printf("did not find %2.0d\n", key);
 	} else {
-		printf("found 1\n");
+		printf("found %2.0d\n", key);
 	}
 
 	printf("Inorder traversal\n");
 	bst_traverse_inorder(root);
 	printf("\n");
+
+	printf("Total nodes in tree: %2.0d\n", root->count);
+	printf("Tree height: %2.0d\n", root->height);
 
 
 	bst_destroy(root);

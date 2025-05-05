@@ -10,6 +10,10 @@ struct node {
 	void *dataptr;
 	struct node *left;
 	struct node *right;
+	// number of nodes in this subtree, including this node
+	int count;
+	// height of the subtree rooted at this node
+	int height;
 };
 
 
@@ -36,6 +40,14 @@ struct node *helper_insert(struct node *root, struct node *newptr) {
 		root->right = helper_insert(root->right, newptr);
 	}
 
+	int lc = root->left ? root->left->count : 0;
+	int rc = root->right ? root->right->count : 0;
+	root->count = 1 + lc + rc;
+
+	int lh = root->left ? root->left->height : 0;
+	int rh = root->right ? root->right->height : 0;
+	root->height = 1 + (lh > rh ? lh : rh);
+
 	return root;
 }
 
@@ -53,6 +65,8 @@ struct node *bst_insert_tree(struct node *root, void *dataptr) {
 	newptr->dataptr = dataptr;
 	newptr->left = NULL;
 	newptr->right = NULL;
+	newptr->count = 1;
+	newptr->height = 1;
 
 	return helper_insert(root, newptr);
 }
