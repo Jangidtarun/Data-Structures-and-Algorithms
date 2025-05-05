@@ -2,12 +2,6 @@
 #include "p8-avl-adt.h"
 
 
-struct data {
-	char word[WORD_MAX_LEN];
-	int count;
-};
-
-
 int cmp_int(void *arg1, void *arg2) {
 	int key1 = *(int *)arg1;
 	int key2 = *(int *)arg2;
