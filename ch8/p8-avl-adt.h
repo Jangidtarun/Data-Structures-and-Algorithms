@@ -42,8 +42,8 @@ static int get_balance(struct node *root) {
 }
 
 
-// get max utility function
-static int max(int a, int b) {
+// max utility function
+int max(const int a, const int b) {
 	return (a > b) ? a : b;
 }
 
@@ -160,7 +160,9 @@ struct node *avl_insert(struct avl_tree *tree, struct node *root, void *dataptr)
 /*
  * retrive a given data pointer
  */
-struct node *avl_retrieve(struct avl_tree *tree, struct node *root, void *dataptr) {
+struct node *avl_retrieve(struct avl_tree *tree, 
+						  struct node *root, 
+						  void *dataptr) {
 	if (root) {
 		if (tree->cmp(dataptr, root->dataptr) < 0) {
 			return avl_retrieve(tree, root->left, dataptr);
@@ -175,7 +177,8 @@ struct node *avl_retrieve(struct avl_tree *tree, struct node *root, void *datapt
 }
 
 
-void avl_inorder(struct node *root, void (*process) (void *dataptr)) {
+void avl_inorder(struct node *root, 
+				 void (*process) (void *dataptr)) {
 	if (root) {
 		avl_inorder(root->left, process);
 		process(root->dataptr);
