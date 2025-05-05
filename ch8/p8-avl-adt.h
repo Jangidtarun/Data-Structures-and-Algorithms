@@ -27,13 +27,19 @@ struct avl_tree {
 };
 
 
-// get height utility function
+/*
+ * returns the height of any given node
+ * return 0 if the node is NULL
+ */
 static int height(struct node *root) {
 	return root ? root->height : 0;
 }
 
 
-// get balance factor utility function
+/*
+ * returns the balance factor of any given node
+ * return 0 if the node is NULL
+ */
 static int get_balance(struct node *root) {
 	if (root == NULL) {
 		return 0;
@@ -42,24 +48,31 @@ static int get_balance(struct node *root) {
 }
 
 
-// max utility function
+/*
+ * it does what you think it does
+ * returns the maximum of two integers
+ */
 int max(const int a, const int b) {
 	return (a > b) ? a : b;
 }
 
 
-// update height utility function
+/*
+ * updates the height of a given node based on its children
+ */
 void update_height(struct node *curr) {
 	if (curr)
 		curr->height = 1 + max(height(curr->left), height(curr->right));
 }
 
 
-// make node function
+/*
+ * creates a new <struct node *> pointer given the dataptr
+ */
 struct node *make_node(void *dataptr) {
 	struct node *curr = (struct node *) malloc(sizeof(struct node));
 	if (!curr) {
-		fprintf(stderr, "Out of memory allocating new node\n");
+		printf("Out of memory allocating new node\n");
 		return NULL;
 	}
 
@@ -72,6 +85,9 @@ struct node *make_node(void *dataptr) {
 }
 
 
+/*
+ * performs right rotation of the given node
+ */
 static struct node *rotate_right(struct node *curr) {
 	struct node *newcurr = curr->left;
 	struct node *tmp = newcurr->right;
@@ -86,6 +102,9 @@ static struct node *rotate_right(struct node *curr) {
 }
 
 
+/*
+ * performs left rotation of the given node
+ */
 static struct node *rotate_left(struct node *curr) {
 	struct node *newcurr = curr->right;
 	struct node *tmp = newcurr->left;
@@ -100,6 +119,10 @@ static struct node *rotate_left(struct node *curr) {
 }
 
 
+/*
+ * initializes the avl_tree structure pointer with count = 0
+ * requires a compare function for the given dataptr object
+ */
 struct avl_tree *avl_tree_init(int (*cmp) (void *arg1, void *arg2)) {
 	struct avl_tree *tree = (struct avl_tree *) malloc(sizeof(struct avl_tree));
 	if (!tree) {
@@ -115,21 +138,37 @@ struct avl_tree *avl_tree_init(int (*cmp) (void *arg1, void *arg2)) {
 }
 
 
-struct node *avl_insert(struct avl_tree *tree, struct node *root, void *dataptr) {
+/*
+ * insert a node into the tree
+ * recursive in nature
+ */
+struct node *avl_insert(struct avl_tree *tree, 
+						struct node *root, 
+						void *dataptr) {
+	// 1. recursive part
 	if (!root) {
-		tree->count += 1;
-		return make_node(dataptr);
+		struct node *newnode = make_node(dataptr);
+		if (!newnode) {
+			return NULL;
+		} else {
+			// only update the count if the node was actually added
+			tree->count += 1;
+		}
+		return newnode;
 	}
 
 	if (tree->cmp(dataptr, root->dataptr) < 0) {
+		// go left
 		root->left = avl_insert(tree, root->left, dataptr);
 	} else if (tree->cmp(dataptr, root->dataptr) > 0) {
+		// go right
 		root->right = avl_insert(tree, root->right, dataptr);
 	} else {
 		// no duplicates
 		return root;
 	}
 
+	// 2. non-recursive part
 	update_height(root);
 	int bal = get_balance(root);
 
@@ -177,6 +216,10 @@ struct node *avl_retrieve(struct avl_tree *tree,
 }
 
 
+/*
+ * processes the tree in inorder fashion
+ * process function has to be provided by user
+ */
 void avl_inorder(struct node *root, 
 				 void (*process) (void *dataptr)) {
 	if (root) {
@@ -187,6 +230,9 @@ void avl_inorder(struct node *root,
 }
 
 
+/*
+ * destroy the root of the tree
+ */
 static void avl_destroy(struct node *root) {
 	if (root) {
 		avl_destroy(root->left);
@@ -196,6 +242,10 @@ static void avl_destroy(struct node *root) {
 	}
 }
 
+
+/*
+ * destroy the tree
+ */
 void avl_tree_destroy(struct avl_tree *tree) {
 	if (!tree) {
 		return;
