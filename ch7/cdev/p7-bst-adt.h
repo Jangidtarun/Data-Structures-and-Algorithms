@@ -1,41 +1,20 @@
-#ifndef P7_BST_ADT_H
-#define P7_BST_ADT_H
+#ifndef _P7_BST_ADT_H
+#define _P7_BST_ADT_H
 
 #include <stdlib.h>
 #include <stdbool.h>
+#include <stdio.h>
 
 // bst node
 struct node {
-	int height;
-	int count;
 	void *dataptr;
 	struct node *left;
 	struct node *right;
 };
 
 
-// bst create function
-struct node *bst_create_tree() {
-	struct node *root;
-
-	root = (struct node *) malloc(sizeof(struct node));
-	if (!root) {
-		printf("Not enough memory to create tree\n");
-		return NULL;
-	}
-
-	root->height = 0;
-	root->count = 0;
-	root->dataptr = NULL;
-	root->left = NULL;
-	root->right = NULL;
-
-	return root;
-}
-
-
 static bool less(const void *a, const void *b) {
-	printf("less: a=%p, b=%p\n", a, b);
+	// printf("less: a=%p, b=%p\n", a, b);
 	return *(int *)a < *(int *)b;
 }
 
@@ -52,7 +31,7 @@ struct node *helper_insert(struct node *root, struct node *newptr) {
 	}
 
 	if (less(newptr->dataptr, root->dataptr)) {
-	   root->left = helper_insert(root->left, newptr);
+		root->left = helper_insert(root->left, newptr);
 	} else {
 		root->right = helper_insert(root->right, newptr);
 	}
@@ -62,7 +41,7 @@ struct node *helper_insert(struct node *root, struct node *newptr) {
 
 
 // bst insert function
-struct node *bst_insert_tree(struct node **root, void *dataptr) {
+struct node *bst_insert_tree(struct node *root, void *dataptr) {
 	struct node *newptr;
 
 	newptr = (struct node *) malloc(sizeof(struct node));
@@ -71,68 +50,52 @@ struct node *bst_insert_tree(struct node **root, void *dataptr) {
 		return root;
 	}
 
-	newptr->height = 1;
-	newptr->count = 1;
 	newptr->dataptr = dataptr;
 	newptr->left = NULL;
 	newptr->right = NULL;
 
-	if (!root || root->count == 0) {
-		root = newptr;
-	} else {
-		helper_insert(root, newptr);
-		root->count += 1;
-	}
-
-	return root;
+	return helper_insert(root, newptr);
 }
 
 
-struct node *helper_delete(struct node *root, void *dataptr, bool *success) {
-	struct node *dltptr;
-	struct node *exchptr;
-	struct node *newroot;
-	void *holdptr;
-
+// bst delete helper
+struct node *helper_delete(struct node *root, void *dataptr) {
 	if (!root) {
-		*success = false;
 		return NULL;
 	}
 
 	if (less(dataptr, root->dataptr)) {
-		root->left = helper_delete(root->left, dataptr, success);
+		root->left = helper_delete(root->left, dataptr);
 	} else if (more(dataptr, root->dataptr)) {
-		root->right = helper_delete(root->right, dataptr, success);
+		root->right = helper_delete(root->right, dataptr);
 	} else {
-		// this is the node to delete
-		dltptr = root;
+		// found the node 
+		struct node *tmp;
+
 		if (!root->left) {
 			// no left subtree
+			tmp = root->right;
 			free(root->dataptr);
-			newroot = root->right;
-			free(dltptr);
-			*success = true;
-			return newroot;
+			free(root);
+			return tmp;
 		} else if (!root->right) {
 			// only left subtree
-			newroot = root->left;
-			free(dltptr);
-			*success = true;
-			return newroot;
+			tmp = root->left;
+			free(root->dataptr);
+			free(root);
+			return tmp;
 		} else {
-			// both subtrees are there
-			exchptr = root->left;
-			
-			// look for largest node on left subtree
-			while (exchptr->right) {
-				exchptr = exchptr->right;
+			// find inorder predecessor (max in left)
+			struct node *pred = root->left;
+			while (pred->right) {
+				pred = pred->right;
 			}
 
-			// exchange data
-			holdptr = root->dataptr;
-			root->dataptr = exchptr->dataptr;
-			exchptr->dataptr = holdptr;
-			root->left = helper_delete(root->left, exchptr->dataptr, success);
+			void *tmp = root->dataptr;
+			root->dataptr = pred->dataptr;
+			pred->dataptr = tmp;
+
+			root->left = helper_delete(root->left, pred->dataptr);
 		}
 	}
 
@@ -141,18 +104,8 @@ struct node *helper_delete(struct node *root, void *dataptr, bool *success) {
 
 
 // deletes a node from the bst tree
-bool bst_delete_tree(struct node *root, void *dltkey) {
-	struct node *newroot;
-	bool success;
-
-	newroot = helper_delete(root, dltkey, &success);
-
-	if (success) {
-		root = newroot;
-		root->count -= 1;
-	}
-
-	return success;
+struct node *bst_delete_tree(struct node *root, void *dltkey) {
+	return helper_delete(root, dltkey);
 }
 		
 
@@ -160,7 +113,7 @@ bool bst_delete_tree(struct node *root, void *dltkey) {
 // else returns NULL
 void *bst_retrieve(struct node *root, void *keyptr) {
 	if (root) {
-		printf("bst_retrieve: root->dataptr = %p\n", root->dataptr);
+		// printf("bst_retrieve: root->dataptr = %p\n", root->dataptr);
 		if (less(keyptr, root->dataptr)) {
 			return bst_retrieve(root->left, keyptr);
 		} else if (more(keyptr, root->dataptr)) {
@@ -175,32 +128,22 @@ void *bst_retrieve(struct node *root, void *keyptr) {
 
 
 void bst_traverse_inorder(struct node *root) {
-	if (root) {
-		if (root->left)
-			bst_traverse_inorder(root->left);
-		printf("%2.0d ", *(int *)(root->dataptr));
-		if (root->right)
-			bst_traverse_inorder(root->right);
-	}
-}
-
-
-bool is_bst_empty(struct node *root) {
-	return root->count == 0;
-}
-
-
-int bst_count(struct node *root) {
-	return root->count;
+	if (!root)
+		return;
+	
+	bst_traverse_inorder(root->left);
+	printf("%2.0d ", *(int *)(root->dataptr));
+	bst_traverse_inorder(root->right);
 }
 
 
 void bst_destroy(struct node *root) {
-	if (root) {
-		bst_destroy(root->left);
-		bst_destroy(root->right);
-		free(root);
-	}
+	if (!root)
+		return;
+
+	bst_destroy(root->left);
+	bst_destroy(root->right);
+	free(root);
 }
 
-#endif
+#endif // _P7_BST_ADT_H
