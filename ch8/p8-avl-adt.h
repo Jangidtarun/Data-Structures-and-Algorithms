@@ -139,36 +139,12 @@ struct avl_tree *avl_tree_init(int (*cmp) (void *arg1, void *arg2)) {
 
 
 /*
- * insert a node into the tree
- * recursive in nature
+ * balance tree
  */
-struct node *avl_insert(struct avl_tree *tree, 
-						struct node *root, 
-						void *dataptr) {
-	// 1. recursive part
-	if (!root) {
-		struct node *newnode = make_node(dataptr);
-		if (!newnode) {
-			return NULL;
-		} else {
-			// only update the count if the node was actually added
-			tree->count += 1;
-		}
-		return newnode;
-	}
+struct node *balance_tree(struct avl_tree *tree, 
+		struct node *root, 
+		void *dataptr) {
 
-	if (tree->cmp(dataptr, root->dataptr) < 0) {
-		// go left
-		root->left = avl_insert(tree, root->left, dataptr);
-	} else if (tree->cmp(dataptr, root->dataptr) > 0) {
-		// go right
-		root->right = avl_insert(tree, root->right, dataptr);
-	} else {
-		// no duplicates
-		return root;
-	}
-
-	// 2. non-recursive part
 	update_height(root);
 	int bal = get_balance(root);
 
@@ -197,15 +173,127 @@ struct node *avl_insert(struct avl_tree *tree,
 
 
 /*
+ * insert a node into the tree
+ * recursive in nature
+ */
+struct node *avl_insert(struct avl_tree *tree, 
+						struct node *root, 
+						void *dataptr) {
+	// finding the place to insert
+	if (!root) {
+		struct node *newnode = make_node(dataptr);
+		if (!newnode) {
+			return NULL;
+		} else {
+			// only update the count if the node was actually added
+			tree->count += 1;
+		}
+		return newnode;
+	}
+
+	int cmpres = tree->cmp(dataptr, root->dataptr);
+	if (cmpres < 0) {
+		// go left
+		root->left = avl_insert(tree, root->left, dataptr);
+	} else if (cmpres > 0) {
+		// go right
+		root->right = avl_insert(tree, root->right, dataptr);
+	} else {
+		// no duplicates
+		return root;
+	}
+
+	// balancing
+	return balance_tree(tree, root, dataptr);
+}
+
+
+/*
+ * get predecesor
+ */
+struct node *get_predecesor(struct node *root) {
+	struct node *tmp = root;
+	while (tmp && tmp->right) {
+		tmp = tmp->right;
+	}
+	return tmp;
+}
+
+
+/*
+ * delete a node from tree
+ */
+struct node *avl_delete(struct avl_tree *tree,
+						struct node		*root,
+						void			*dataptr) {
+	if (!root) {
+		// nothing to delete
+		return root;
+	}
+
+	int cmpres = tree->cmp(dataptr, root->dataptr);
+
+	if (cmpres < 0) {
+		// go left
+		root->left = avl_delete(tree, root->left, dataptr);
+	} else if (cmpres > 0) {
+		// go right
+		root->right = avl_delete(tree, root->right, dataptr);
+	} else {
+		// you have reached your destination
+		tree->count -= 1;
+
+		// case 1: no children
+		if (!root->left && !root->right) {
+			free(root->dataptr);
+			free(root);
+			return NULL;
+		}
+
+		// case 2: only right subtree exist
+		else if (!root->left) {
+			struct node *tmp = root->right;
+			free(root->dataptr);
+			free(root);
+			return tmp;
+		}
+
+		// case 3: only left subtree exist
+		else if (!root->right) {
+			struct node *tmp = root->left;
+			free(root->dataptr);
+			free(root);
+			return tmp;
+		}
+
+		// case 4: both subtree exist
+		else if (root->left && root->right) {
+			struct node *pred =	get_predecesor(root->left);
+			void *tmp = root->dataptr;
+			root->dataptr = pred->dataptr;
+			pred->dataptr = tmp;
+
+			root->left = avl_delete(tree, root->left, pred->dataptr);
+		}
+	}
+
+	return balance_tree(tree, root, dataptr);
+}
+
+
+/*
  * retrive a given data pointer
  */
 struct node *avl_retrieve(struct avl_tree *tree, 
-						  struct node *root, 
-						  void *dataptr) {
+						  struct node	  *root, 
+						  void			  *dataptr) {
+
+	int cmpres = tree->cmp(dataptr, root->dataptr);
+
 	if (root) {
-		if (tree->cmp(dataptr, root->dataptr) < 0) {
+		if (cmpres < 0) {
 			return avl_retrieve(tree, root->left, dataptr);
-		} else if (tree->cmp(dataptr, root->dataptr) > 0) {
+		} else if (cmpres > 0) {
 			return avl_retrieve(tree, root->right, dataptr);
 		} else {
 			return root;
@@ -255,6 +343,27 @@ void avl_tree_destroy(struct avl_tree *tree) {
 		}
 		free(tree);
 	}
+}
+
+
+/*
+ * pretty print
+ */
+void avl_pretty_print(struct node *root, 
+		int depth, 
+		void (*process) (void *dataptr)) {
+
+    if (!root) 
+		return;
+
+    avl_pretty_print(root->right, depth + 1, process);
+
+    for (int i = 0; i < depth; i++)
+        printf("  ");  
+	printf("%2d. ", depth);
+	process(root->dataptr);
+
+    avl_pretty_print(root->left, depth + 1, process);
 }
 
 

@@ -16,7 +16,15 @@ int cmp_int(void *arg1, void *arg2) {
 
 void process(void *dataptr) {
 	int data = *(int *)dataptr;
-	printf("%2d ", data);
+	printf("%2d\n", data);
+}
+
+
+void print_tree_inorder(struct avl_tree *tree, 
+		void (*process) (void *dataptr)) {
+	printf("Inorder\n");
+	avl_inorder(tree->root, process);
+	printf("\n");
 }
 
 
@@ -37,6 +45,12 @@ int main() {
 	printf("Inorder\n");
 	avl_inorder(tree->root, process);
 	printf("\n");
+	// print_tree_inorder(tree, process);
+
+	// test delete case 4
+	tree->root = avl_delete(tree, tree->root, &vals[2]);
+	print_tree_inorder(tree, process);
+	avl_pretty_print(tree->root, 0, process);
 
 	avl_tree_destroy(tree);
 	return 0;
