@@ -3,6 +3,7 @@
 
 #include <stdlib.h>
 #include <stdio.h>
+#include "../ch3/p3-stack-adt.h"
 
 
 struct node {
@@ -298,15 +299,42 @@ void avl_pretty_print(struct node *root,
 struct node *avl_iterative_insert(struct avl_tree *tree,
 		struct node *root,
 		void *dataptr) {
+	struct node *newnode = make_node(dataptr);
 
 	if (!root) {
-		return make_node(dataptr);
+		return newnode;
 	}
 
-	// i need a stack definition now
-	// man i am tired
+	struct stack *stk = stack_init();
+
+	// find insert point
+	struct node *traveller = root;
+
+	while (traveller) {
+		push_stack(stk, traveller);
+		int cmp = tree->cmp(dataptr, traveller->dataptr);
+		
+		if (cmp < 0)
+			traveller = traveller->left;
+		else
+			traveller = traveller->right;
+	}
+
+	struct node *insert_point = stack_top(stk);
+	free_stack_nodata(stk);
 	
-	return NULL;
+	// insert the node
+	int cmp = tree->cmp(dataptr, insert_point->dataptr);
+	if (cmp < 0) {
+		insert_point->left = newnode;
+	} else if (cmp > 0) {
+		insert_point->right = newnode;
+	} else {
+		printf("Insertion failed\n");
+		printf("Duplicates are not allowed\n");
+	}
+
+	return root;
 }
 
 

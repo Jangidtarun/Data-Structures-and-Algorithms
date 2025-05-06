@@ -105,4 +105,23 @@ struct stack *stack_destroy(struct stack *this) {
 }
 
 
+/*
+ * this free function only frees the memory allocated for the stack
+ * structure and does nothing for the node structure, designed for the 
+ * case when you want to retain the pointers from stack even after deleting 
+ * the stack.
+ */
+void free_stack_nodata(struct stack *stk) {
+	if (stk) {
+		while (stk->top != NULL) {
+			struct stack_node *tmp = stk->top;
+			stk->top = stk->top->link;
+			free(tmp);
+		}
+		free(stk);
+	}
+}
+
+
+
 #endif

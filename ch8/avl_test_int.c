@@ -39,7 +39,7 @@ int main() {
 			exit(110);
 		}
 		*data = vals[i];
-		tree->root = avl_insert(tree, tree->root, data);
+		tree->root = avl_iterative_insert(tree, tree->root, data);
 	}
 
 	printf("Inorder\n");
@@ -47,9 +47,12 @@ int main() {
 	printf("\n");
 	// print_tree_inorder(tree, process);
 
+	/*
 	// test delete case 4
 	tree->root = avl_delete(tree, tree->root, &vals[2]);
 	print_tree_inorder(tree, process);
+	*/
+
 	avl_pretty_print(tree->root, 0, process);
 
 	avl_tree_destroy(tree);
