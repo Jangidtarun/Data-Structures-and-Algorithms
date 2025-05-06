@@ -31,6 +31,7 @@ int main() {
 	build_list(wlist);
 	print_list(wlist);
 
+	avl_tree_destroy(wlist);
 	printf("End count words\n");
 	return 0;
 }
@@ -76,6 +77,7 @@ void build_list(struct avl_tree *wlist) {
 		}
 	}
 
+	fclose(fpwords);
 	printf("End AVL Tree\n");
 	return;
 }
