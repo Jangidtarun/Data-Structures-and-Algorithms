@@ -5,9 +5,6 @@
 #include <stdio.h>
 
 
-/*
- * AVL node structure
- */
 struct node {
 	void *dataptr;
 	struct node *left;
@@ -16,10 +13,6 @@ struct node {
 };
 
 
-/*
- * AVL Tree structure
- * uses a compare function
- */
 struct avl_tree {
 	struct node *root;
 	int count;
@@ -27,19 +20,11 @@ struct avl_tree {
 };
 
 
-/*
- * returns the height of any given node
- * return 0 if the node is NULL
- */
 static int height(struct node *root) {
 	return root ? root->height : 0;
 }
 
 
-/*
- * returns the balance factor of any given node
- * return 0 if the node is NULL
- */
 static int get_balance(struct node *root) {
 	if (root == NULL) {
 		return 0;
@@ -48,27 +33,17 @@ static int get_balance(struct node *root) {
 }
 
 
-/*
- * it does what you think it does
- * returns the maximum of two integers
- */
 int max(const int a, const int b) {
 	return (a > b) ? a : b;
 }
 
 
-/*
- * updates the height of a given node based on its children
- */
 void update_height(struct node *curr) {
 	if (curr)
 		curr->height = 1 + max(height(curr->left), height(curr->right));
 }
 
 
-/*
- * creates a new <struct node *> pointer given the dataptr
- */
 struct node *make_node(void *dataptr) {
 	struct node *curr = (struct node *) malloc(sizeof(struct node));
 	if (!curr) {
@@ -85,9 +60,6 @@ struct node *make_node(void *dataptr) {
 }
 
 
-/*
- * performs right rotation of the given node
- */
 static struct node *rotate_right(struct node *curr) {
 	struct node *newcurr = curr->left;
 	struct node *tmp = newcurr->right;
@@ -102,9 +74,6 @@ static struct node *rotate_right(struct node *curr) {
 }
 
 
-/*
- * performs left rotation of the given node
- */
 static struct node *rotate_left(struct node *curr) {
 	struct node *newcurr = curr->right;
 	struct node *tmp = newcurr->left;
@@ -119,10 +88,6 @@ static struct node *rotate_left(struct node *curr) {
 }
 
 
-/*
- * initializes the avl_tree structure pointer with count = 0
- * requires a compare function for the given dataptr object
- */
 struct avl_tree *avl_tree_init(int (*cmp) (void *arg1, void *arg2)) {
 	struct avl_tree *tree = (struct avl_tree *) malloc(sizeof(struct avl_tree));
 	if (!tree) {
@@ -138,9 +103,6 @@ struct avl_tree *avl_tree_init(int (*cmp) (void *arg1, void *arg2)) {
 }
 
 
-/*
- * balance tree
- */
 struct node *balance_tree(struct avl_tree *tree, 
 		struct node *root, 
 		void *dataptr) {
@@ -172,20 +134,15 @@ struct node *balance_tree(struct avl_tree *tree,
 }
 
 
-/*
- * insert a node into the tree
- * recursive in nature
- */
 struct node *avl_insert(struct avl_tree *tree, 
 						struct node *root, 
 						void *dataptr) {
-	// finding the place to insert
+	
 	if (!root) {
 		struct node *newnode = make_node(dataptr);
 		if (!newnode) {
 			return NULL;
 		} else {
-			// only update the count if the node was actually added
 			tree->count += 1;
 		}
 		return newnode;
@@ -193,24 +150,19 @@ struct node *avl_insert(struct avl_tree *tree,
 
 	int cmpres = tree->cmp(dataptr, root->dataptr);
 	if (cmpres < 0) {
-		// go left
 		root->left = avl_insert(tree, root->left, dataptr);
 	} else if (cmpres > 0) {
-		// go right
 		root->right = avl_insert(tree, root->right, dataptr);
 	} else {
-		// no duplicates
+		// no duplicates for now
+		// might add later
 		return root;
 	}
 
-	// balancing
 	return balance_tree(tree, root, dataptr);
 }
 
 
-/*
- * get predecesor
- */
 struct node *get_predecesor(struct node *root) {
 	struct node *tmp = root;
 	while (tmp && tmp->right) {
@@ -220,30 +172,23 @@ struct node *get_predecesor(struct node *root) {
 }
 
 
-/*
- * delete a node from tree
- */
 struct node *avl_delete(struct avl_tree *tree,
 						struct node		*root,
 						void			*dataptr) {
 	if (!root) {
-		// nothing to delete
 		return root;
 	}
 
 	int cmpres = tree->cmp(dataptr, root->dataptr);
 
 	if (cmpres < 0) {
-		// go left
 		root->left = avl_delete(tree, root->left, dataptr);
 	} else if (cmpres > 0) {
-		// go right
 		root->right = avl_delete(tree, root->right, dataptr);
 	} else {
-		// you have reached your destination
 		tree->count -= 1;
 
-		// case 1: no children
+		// case 1: no subtree exist
 		if (!root->left && !root->right) {
 			free(root->dataptr);
 			free(root);
@@ -281,12 +226,8 @@ struct node *avl_delete(struct avl_tree *tree,
 }
 
 
-/*
- * retrive a given data pointer
- */
 struct node *avl_retrieve(struct avl_tree *tree, 
-						  struct node	  *root, 
-						  void			  *dataptr) {
+		struct node	*root, void *dataptr) {
 
 	int cmpres = tree->cmp(dataptr, root->dataptr);
 
@@ -304,10 +245,6 @@ struct node *avl_retrieve(struct avl_tree *tree,
 }
 
 
-/*
- * processes the tree in inorder fashion
- * process function has to be provided by user
- */
 void avl_inorder(struct node *root, 
 				 void (*process) (void *dataptr)) {
 	if (root) {
@@ -318,9 +255,6 @@ void avl_inorder(struct node *root,
 }
 
 
-/*
- * destroy the root of the tree
- */
 static void avl_destroy(struct node *root) {
 	if (root) {
 		avl_destroy(root->left);
@@ -331,9 +265,6 @@ static void avl_destroy(struct node *root) {
 }
 
 
-/*
- * destroy the tree
- */
 void avl_tree_destroy(struct avl_tree *tree) {
 	if (!tree) {
 		return;
@@ -346,9 +277,6 @@ void avl_tree_destroy(struct avl_tree *tree) {
 }
 
 
-/*
- * pretty print
- */
 void avl_pretty_print(struct node *root, 
 		int depth, 
 		void (*process) (void *dataptr)) {
@@ -364,6 +292,21 @@ void avl_pretty_print(struct node *root,
 	process(root->dataptr);
 
     avl_pretty_print(root->left, depth + 1, process);
+}
+
+
+struct node *avl_iterative_insert(struct avl_tree *tree,
+		struct node *root,
+		void *dataptr) {
+
+	if (!root) {
+		return make_node(dataptr);
+	}
+
+	// i need a stack definition now
+	// man i am tired
+	
+	return NULL;
 }
 
 
