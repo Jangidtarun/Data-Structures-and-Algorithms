@@ -2,6 +2,8 @@
 #define _P9_HEAP_ADT_H
 
 #include <math.h>
+#include <stdio.h>
+#include <stdlib.h>
 
 struct heap {
 	void **heaparr;
@@ -30,10 +32,12 @@ struct heap *heap_init(int maxsize,
 }
 
 
-void _reheapup(struct heap *h, int childloc) {
+int _reheapup(struct heap *h, int childloc) {
 	void **heaparr;
 	int parent;
 	void *hold;
+
+	int nswap = 0;
 
 	if (childloc) {
 		heaparr = h->heaparr;
@@ -42,13 +46,16 @@ void _reheapup(struct heap *h, int childloc) {
 			hold = heaparr[parent];
 			heaparr[parent] = heaparr[childloc];
 			heaparr[childloc] = hold;
-			_reheapup(h, parent);
+			++nswap;
+			nswap += _reheapup(h, parent);
 		}
 	}
+
+	return nswap;
 }
 
 
-bool heap_insert(struct heap *h, void *dataptr) {
+bool heap_insert(struct heap *h, void *dataptr, int *swaps) {
 	if (h->size == 0) {
 		h->size = 1;
 		h->last = 0;
@@ -62,15 +69,17 @@ bool heap_insert(struct heap *h, void *dataptr) {
 	h->last += 1;
 	h->size += 1;
 	h->heaparr[h->last] = dataptr;
-	_reheapup(h, h->last);
+	*swaps += _reheapup(h, h->last);
 
 	return true;
 }
 
 
-void _reheapdown(struct heap *h, int root) {
+int _reheapdown(struct heap *h, int root) {
 	int last = h->last;
 	int leftdataloc = root * 2 + 1;
+	int nswap = 0;
+
 	if (leftdataloc <= last) {
 		void *leftdata = h->heaparr[leftdataloc];
 		int rightdataloc = root * 2 + 2;
@@ -99,13 +108,16 @@ void _reheapdown(struct heap *h, int root) {
 			void *hold = h->heaparr[root];
 			h->heaparr[root] = h->heaparr[largeloc];
 			h->heaparr[largeloc] = hold;
-			_reheapdown(h, largeloc);
+			++nswap;
+			nswap += _reheapdown(h, largeloc);
 		}
 	}
+
+	return nswap;
 }
 
 
-bool heap_delete(struct heap *h, void **dataout_ptr) {
+bool heap_delete(struct heap *h, void **dataout_ptr, int *swaps) {
 	if (h->size == 0)
 		return false;
 
@@ -113,7 +125,7 @@ bool heap_delete(struct heap *h, void **dataout_ptr) {
 	h->heaparr[0] = h->heaparr[h->last];
 	h->last -= 1;
 	h->size -= 1;
-	_reheapdown(h, 0);
+	*swaps += _reheapdown(h, 0);
 
 	return true;
 }
@@ -123,9 +135,6 @@ void free_heap(struct heap *h) {
 	free(h->heaparr);
 	free(h);
 }
-
-
-
 
 
 #endif
