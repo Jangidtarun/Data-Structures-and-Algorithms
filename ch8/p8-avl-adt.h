@@ -331,9 +331,11 @@ void avl_pretty_print(struct node *root,
 }
 
 
-
-
-
+/*
+ * under construction
+ * balancing remains
+ * no memory issues for now
+ */
 struct node *avl_iterative_insert(struct avl_tree *tree,
 		struct node *root,
 		void *dataptr) {
@@ -375,6 +377,12 @@ struct node *avl_iterative_insert(struct avl_tree *tree,
 	}
 
 	tree->count += 1;
+
+	/*
+	 * the issue with balancing is that pop_stack also frees the node it stored
+	 * unless there is a way around that balancing is tricky
+	 * pop_stack frees memory it should not [just in this case]
+	 */
 
 	free_stack_nodata(stk);
 	return root;
