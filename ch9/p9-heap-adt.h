@@ -38,7 +38,7 @@ void _reheapup(struct heap *h, int childloc) {
 	if (childloc) {
 		heaparr = h->heaparr;
 		parent = (childloc - 1) / 2;
-		if (h->cmp(heaparry[childloc], heaparr[parent]) > 0) {
+		if (h->cmp(heaparr[childloc], heaparr[parent]) > 0) {
 			hold = heaparr[parent];
 			heaparr[parent] = heaparr[childloc];
 			heaparr[childloc] = hold;
@@ -69,9 +69,7 @@ bool heap_insert(struct heap *h, void *dataptr) {
 
 
 void _reheapdown(struct heap *h, int root) {
-	int last;
-
-	last = h->last;
+	int last = h->last;
 	int leftdataloc = root * 2 + 1;
 	if (leftdataloc <= last) {
 		void *leftdata = h->heaparr[leftdataloc];
