@@ -27,9 +27,8 @@ static int height(struct node *root) {
 
 
 static int get_balance(struct node *root) {
-	if (root == NULL) {
+	if (!root)
 		return 0;
-	}
 	return height(root->left) - height(root->right);
 }
 
@@ -135,6 +134,42 @@ struct node *balance_tree(struct avl_tree *tree,
 }
 
 
+/*
+ * this function is bug free both balancing algorithms work exactly the 
+ * same way just that this one does not require the additional argument
+ * to dataptr
+ */
+struct node *balance_tree_chatgpt(struct avl_tree *tree, struct node *root) {
+	if (!root)
+		return NULL;
+
+	update_height(root);
+	int bal = get_balance(root);
+
+	// left heavy
+	if (bal > 1) {
+		if (get_balance(root->left) >= 0) {
+			return rotate_right(root);
+		} else {
+			root->left = rotate_left(root->left);
+			return rotate_right(root);
+		}
+	}
+
+	// right heavy
+	if (bal < -1) {
+		if (get_balance(root->right) <= 0) {
+			return rotate_left(root);
+		} else {
+			root->right = rotate_right(root->right);
+			return rotate_left(root);
+		}
+	}
+
+	return root;
+}
+
+
 struct node *avl_insert(struct avl_tree *tree, 
 						struct node *root, 
 						void *dataptr) {
@@ -160,7 +195,7 @@ struct node *avl_insert(struct avl_tree *tree,
 		return root;
 	}
 
-	return balance_tree(tree, root, dataptr);
+	return balance_tree_chatgpt(tree, root);
 }
 
 
@@ -223,7 +258,7 @@ struct node *avl_delete(struct avl_tree *tree,
 		}
 	}
 
-	return balance_tree(tree, root, dataptr);
+	return balance_tree_chatgpt(tree, root);
 }
 
 
@@ -296,44 +331,52 @@ void avl_pretty_print(struct node *root,
 }
 
 
+
+
+
 struct node *avl_iterative_insert(struct avl_tree *tree,
 		struct node *root,
 		void *dataptr) {
 	struct node *newnode = make_node(dataptr);
 
 	if (!root) {
+		tree->count += 1;
 		return newnode;
 	}
 
 	struct stack *stk = stack_init();
-
-	// find insert point
 	struct node *traveller = root;
 
 	while (traveller) {
 		push_stack(stk, traveller);
+		printf("pushing %2d in stack\n", *(int *)(traveller->dataptr));
+
 		int cmp = tree->cmp(dataptr, traveller->dataptr);
 		
 		if (cmp < 0)
 			traveller = traveller->left;
-		else
+		else if (cmp > 0)
 			traveller = traveller->right;
+		else {
+			printf("Duplicates are not allowed\n");
+			free(newnode);
+			free_stack_nodata(stk);
+			return root;
+		}
+
 	}
 
 	struct node *insert_point = stack_top(stk);
-	free_stack_nodata(stk);
-	
-	// insert the node
 	int cmp = tree->cmp(dataptr, insert_point->dataptr);
 	if (cmp < 0) {
 		insert_point->left = newnode;
-	} else if (cmp > 0) {
-		insert_point->right = newnode;
 	} else {
-		printf("Insertion failed\n");
-		printf("Duplicates are not allowed\n");
+		insert_point->right = newnode;
 	}
 
+	tree->count += 1;
+
+	free_stack_nodata(stk);
 	return root;
 }
 

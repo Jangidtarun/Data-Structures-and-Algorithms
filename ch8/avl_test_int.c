@@ -30,9 +30,9 @@ void print_tree_inorder(struct avl_tree *tree,
 
 int main() {
 	struct avl_tree *tree = avl_tree_init(&cmp_int);
-	int vals[] = {10, 20, 30, 40, 50, 25};
+	int vals[] = {7, 10, 14, 66, 33, 80, 56};
 
-	for (int i = 0; i < 6; i++) {
+	for (int i = 0; i < sizeof(vals)/sizeof(int); i++) {
 		int *data = (int *)malloc(sizeof(int));
 		if (!data) {
 			printf("unable to assign new data\n");
@@ -47,11 +47,9 @@ int main() {
 	printf("\n");
 	// print_tree_inorder(tree, process);
 
-	/*
 	// test delete case 4
 	tree->root = avl_delete(tree, tree->root, &vals[2]);
 	print_tree_inorder(tree, process);
-	*/
 
 	avl_pretty_print(tree->root, 0, process);
 
