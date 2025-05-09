@@ -1,10 +1,13 @@
 #ifndef _P4_QUEUE_ADT_H
 #define _P4_QUEUE_ADT_H
 
+#include <stdlib.h>
+#include <stdbool.h>
+#include <stdio.h>
 
 struct QUEUE_NODE {
 	void *dataptr;
-	struct node *next;
+	struct QUEUE_NODE *next;
 };
 
 
