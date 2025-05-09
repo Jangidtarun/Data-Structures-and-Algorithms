@@ -84,14 +84,21 @@ int main() {
 	int moves = 0;
 	
 	struct heap *h = heap_init(current_size, cmp_int);
-	
+/*
+	h->heaparr = (void **)&arr;
+	bool success = build_heap_faster(h, &moves);
+	if (success) {
+		printf("successfully built heap\n");
+	}
+*/
 	for (int i = 0; i < current_size; i++) {
 		bool success = heap_insert(h, &arr[i], &moves);
 	}
 
 	printf("moves: %5d\n", moves);
+	print_heap(h);
 
 	free(arr);
-	free_heap(h);
+	// free_heap(h);
 	return 0;
 }

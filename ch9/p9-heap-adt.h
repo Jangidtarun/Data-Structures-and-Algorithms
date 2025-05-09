@@ -117,6 +117,25 @@ int _reheapdown(struct heap *h, int root) {
 }
 
 
+bool build_heap_faster(struct heap *h, int *count) {
+	int last_subtree_loc = h->size / 2 - 1;
+
+	for (int i = last_subtree_loc; i >= 0; i--) {
+		*count += _reheapdown(h, i);
+	}
+
+	return true;
+}
+
+
+void print_heap(struct heap *h, void (*process) (void *cust)) {
+	for (int i = 0; i < h->size; i++) {
+		process(h->heaparr[i]);
+	}
+	printf("\n");
+}
+
+
 bool heap_delete(struct heap *h, void **dataout_ptr, int *swaps) {
 	if (h->size == 0)
 		return false;

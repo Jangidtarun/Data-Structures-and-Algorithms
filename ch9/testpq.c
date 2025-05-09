@@ -83,19 +83,26 @@ void process_pq(struct heap *pq) {
 				c = get_pq_node();
 				++num_nodes;
 				c->serial = c->priority * 1000 + (1000 - num_nodes);
-				res = heap_insert(pq, c);
+				int swaps = 0;
+				res = heap_insert(pq, c, &swaps);
 				if (!res) {
 					printf("Error: Failed to insert into heap\n");
 					exit(101);
 				}
+				
+				printf("swaps in insert: %4d\n", swaps);
+				print_heap(pq);
+
 				break;
 			case 'd':
-				res = heap_delete(pq, (void **)&c);
+				swaps = 0;
+				res = heap_delete(pq, (void **)&c, &swaps);
 				if (!res) {
 					printf("Error: Customer not found\n");
 				} else {
 					printf("Customer %4d deleted\n", c->id);
 					--num_nodes;
+					printf("swaps in delete: %4d\n", swaps);
 				}
 		}
 	}
