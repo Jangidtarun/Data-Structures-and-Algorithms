@@ -1,6 +1,7 @@
 #ifndef _P11_GRAPH_ADT_H
 #define _P11_GRAPH_ADT_H
 
+
 #include <stdbool.h>
 #include "../ch4/p4-queue-adt.h"
 #include "../ch3/p3-stack-adt.h"
@@ -29,6 +30,16 @@ struct ARC {
 };
 
 
+struct GRAPH *graph_init(int (*cmp) (void *arg1, void *arg2)) {
+	struct GRAPH *g = malloc(sizeof(struct GRAPH));
+	if (g) {
+		g->count = 0;
+		g->first = NULL;
+		g->cmp = cmp;
+	}
+
+	return g;
+}
 
 
 #endif
