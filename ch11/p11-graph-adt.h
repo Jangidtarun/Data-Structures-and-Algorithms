@@ -78,4 +78,33 @@ bool graph_insert_vertex(struct graph *g, void *dataptr) {
 }
 
 
+int graph_delete_vertex(struct graph *g, void *dltptr) {
+	if (!g->first)
+		return -2;
+
+	struct vertex *predptr = NULL;
+	struct vertex *walkptr = g->first;
+	while (walkptr && (g->cmp(dltptr, walkptr->dataptr) > 0)) {
+		predptr = walkptr;
+		walkptr = walkptr->pnext_vertex;
+	}
+
+	if (!walkptr || g->cmp(dltptr, walkptr->dataptr) != 0)
+		return -2;
+
+	if (walkptr->indeg > 0 || walkptr->outdeg > 0)
+		return -1;
+
+	if (!predptr)
+		g->first = walkptr->pnext_vertex;
+	else {
+		predptr->pnext_vertex = walkptr->pnext_vertex;
+	}
+
+	g->count -= 1;
+	free(walkptr);
+	return 1;
+}
+
+
 #endif
