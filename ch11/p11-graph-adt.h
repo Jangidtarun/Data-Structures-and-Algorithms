@@ -12,7 +12,7 @@ struct vertex {
 	void *dataptr;
 	int indeg;
 	int outdeg;
-	bool processed;
+	short processed;
 	struct arc *parc;
 };
 
@@ -52,7 +52,7 @@ bool graph_insert_vertex(struct graph *g, void *dataptr) {
 	newptr->dataptr = dataptr;
 	newptr->indeg = 0;
 	newptr->outdeg = 0;
-	newptr->processed = false;
+	newptr->processed = 0;
 	newptr->parc = NULL;
 
 	if (!g->first)
@@ -191,6 +191,57 @@ int graph_delete_arc(struct graph *g, void *from, void *to) {
 
 	free(arc_walkptr);
 	return 1;
+}
+
+
+void graph_dfs(struct graph *g, void (*process) (void *dataptr)) {
+	if (!g->first)
+		return;
+
+	struct vertex *walkptr = g->first;
+	while (walkptr) {
+		walkptr->processed = 0;
+		walkptr = walkptr->pnext_vertex;
+	}
+
+	struct stack *s = stack_init();
+	walkptr = g->first;
+	while (walkptr) {
+		if (walkptr->processed = 0) {
+			bool success = push_stack(s, walkptr);
+			if (!success) {
+				printf("Stack overflow\n");
+				exit(101);
+			}
+
+			walkptr->processed = 1;
+		}
+
+		while (!is_stack_empty(s)) {
+			struct vertex *vertptr = pop_stack(s);
+			process(vertptr->dataptr);
+			vertptr->processed = 2;
+
+			struct arc *arc_walkptr = vertptr->parc;
+			while (arc_walkptr) {
+				struct vertex *vert_to = arc_walkptr->destination;
+				if (vert_to->processed == 0) {
+					bool success = push_stack(s, vert_to);
+					if (!success) {
+						printf("\aStack overflow\a\n");
+						exit(101);
+					}
+
+					vert_to->processed = 1;
+				}
+				arc_walkptr = arc_walkptr->pnext_arc;
+			}
+		}
+
+		walkptr = walkptr->pnext_vertex;
+	}
+
+	free_stack(s);
 }
 
 
