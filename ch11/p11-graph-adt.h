@@ -245,4 +245,55 @@ void graph_dfs(struct graph *g, void (*process) (void *dataptr)) {
 }
 
 
+void graph_bfs(struct graph *g, void (*process) (void *dataptr)) {
+	if (!g->first)
+		return;
+
+	struct vertex *walkptr = g->first;
+	while (walkptr) {
+		walkptr->processed = 0;
+		walkptr = walkptr->pnext_vertex;
+	}
+
+	struct QUEUE *q = queue_init();
+	walkptr = g->first;
+	while (walkptr) {
+		if (walkptr->processe == 0) {
+			bool success = enqueue(q, walkptr);
+			if (!success) {
+				printf("\aQueue overflow\a\n");
+				exit(101);
+			}
+
+			walkptr->processed = 1;
+		}
+		
+		while (!is_queue_empty(q)) {
+			struct vertex *vertptr;
+			dequeue(q, (void **)&vertptr);
+			process(vertptr->dataptr);
+			vertptr->processed = 2;
+
+			struct arc *arc_walkptr = vertptr->parc;
+			while (arc_walkptr) {
+				struct vert_to = arc_walkptr->destination;
+				if (vert_to->processed == 0) {
+					success = enqueue(q, vert_to);
+					if (!success) {
+						printf("\aQueue overflow\a\n");
+						exit(101);
+					}
+
+					vert_to->processed = 1;
+				}
+				arc_walkptr = arc_warlptr->pnext_arc;
+			}
+		}
+		walkptr = walkptr->pnext_vertex;
+	}
+	free_queue(q);
+}
+
+
+
 #endif
