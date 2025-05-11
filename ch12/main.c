@@ -31,11 +31,6 @@ void print_arr(int arr[], int size) {
 }
 
 
-void reheap(int arr[], int size) {
-
-}
-
-
 int main() {
 	int arr[] = {93, 74, 90, 37, 57, 61, 30, 14, 19, 56, 24};
 	int size = sizeof(arr) / sizeof(int);
